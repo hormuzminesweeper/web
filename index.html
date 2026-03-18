@@ -448,6 +448,34 @@ body {
     animation: textPulse 1s ease-in-out infinite;
 }
 
+.fail-video {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+}
+
+.fail-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.fail-video .subtitle {
+    position: absolute;
+    bottom: 40px;
+    width: 100%;
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffff00;
+    text-shadow: 3px 3px 6px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    animation: subtitleAppear 0.5s ease-out;
+}
+
 @keyframes explode {
     0% { transform: scale(0); opacity: 1; }
     50% { transform: scale(1.5); opacity: 1; }
@@ -814,6 +842,7 @@ function initI18n() {
 
     function handleTouchStart(e) {
         if (game.gameOver) return;
+        e.preventDefault();
         
         const touch = e.touches[0];
         game.dragStartX = touch.clientX;
@@ -840,6 +869,8 @@ function initI18n() {
     }
 
     function handleTouchMove(e) {
+        e.preventDefault();
+        
         const touch = e.touches[0];
         const deltaX = touch.clientX - game.dragStartX;
         const deltaY = touch.clientY - game.dragStartY;
@@ -1150,10 +1181,13 @@ function initI18n() {
         elements.animationContainer.innerHTML = '';
 
         if (type === 'fail') {
-            const failDiv = document.createElement('div');
-            failDiv.className = 'fail-animation';
-            failDiv.innerHTML = '<div class="explosion"></div><div class="trump"></div><div class="fail-text">' + t('failTitle') + '</div>';
-            elements.animationContainer.appendChild(failDiv);
+            const failVideoDiv = document.createElement('div');
+            failVideoDiv.className = 'fail-video';
+            failVideoDiv.innerHTML = `
+                <video id="failVideo" src="./fail.mp4" autoplay loop></video>
+                <div class="subtitle">任务失败，川普被炸</div>
+            `;
+            elements.animationContainer.appendChild(failVideoDiv);
         } else {
             const successDiv = document.createElement('div');
             successDiv.className = 'success-animation';
