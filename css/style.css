@@ -64,6 +64,12 @@ body {
     margin-bottom: 10px;
 }
 
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .difficulty-selector {
     display: flex;
     gap: 5px;
@@ -202,6 +208,15 @@ body {
     cursor: default;
 }
 
+.cell.revealed.mine {
+    background: rgba(255, 0, 0, 0.8) !important;
+}
+
+.cell.revealed.mine::after {
+    content: '💣';
+    font-size: 18px;
+}
+
 .cell.revealed.number {
     background: rgba(255, 255, 255, 0.85);
     border-radius: 50%;
@@ -215,15 +230,6 @@ body {
 .cell.flagged::after {
     content: '🚩';
     font-size: 16px;
-}
-
-.cell.mine {
-    background: rgba(255, 0, 0, 0.8);
-}
-
-.cell.mine::after {
-    content: '💣';
-    font-size: 18px;
 }
 
 .cell[data-num="1"] { color: #0000ff; }
