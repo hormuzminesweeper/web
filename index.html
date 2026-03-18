@@ -851,13 +851,16 @@ function initI18n() {
             }
             game.isDragging = true;
             
+            game.dragStartX = touch.clientX;
+            game.dragStartY = touch.clientY;
+            
             const maxScrollLeft = Math.max(0, elements.board.scrollWidth - elements.board.clientWidth);
-            const newScrollLeft = game.scrollStartX - deltaX;
-            elements.board.scrollLeft = Math.max(0, Math.min(newScrollLeft, maxScrollLeft));
+            const newScrollLeft = Math.max(0, Math.min(elements.board.scrollLeft - deltaX, maxScrollLeft));
+            elements.board.scrollLeft = newScrollLeft;
             
             const maxScrollTop = Math.max(0, elements.board.scrollHeight - elements.board.clientHeight);
-            const newScrollTop = game.scrollStartY - deltaY;
-            elements.board.scrollTop = Math.max(0, Math.min(newScrollTop, maxScrollTop));
+            const newScrollTop = Math.max(0, Math.min(elements.board.scrollTop - deltaY, maxScrollTop));
+            elements.board.scrollTop = newScrollTop;
         }
     }
 
