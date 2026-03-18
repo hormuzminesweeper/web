@@ -4,29 +4,482 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>霍尔木兹海峡扫雷</title>
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('./hormuz_mine_map.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+}
+
+.game-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #FFD700;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.5);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    padding: 8px 20px;
+    background: rgba(192, 192, 192, 0.9);
+    border-radius: 4px;
+    border: 2px solid #808080;
+}
+
+.game-container {
+    background-image: url('./hormuz_mine_map.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.game-header {
+    background: rgba(192, 192, 192, 0.95);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 2px solid #808080;
+    border-bottom-color: #dfdfdf;
+    border-right-color: #dfdfdf;
+}
+
+.header-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.difficulty-selector {
+    display: flex;
+    gap: 5px;
+}
+
+.diff-btn {
+    padding: 5px 12px;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.1s;
+}
+
+.diff-btn:hover {
+    background: #d0d0d0;
+}
+
+.diff-btn.active {
+    background: #a0a0a0;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+.lang-selector {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.lang-btn {
+    padding: 3px 6px;
+    background: #c0c0c0;
+    border: 1px solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    cursor: pointer;
+    font-size: 10px;
+    min-width: 24px;
+    transition: all 0.1s;
+}
+
+.lang-btn:hover {
+    background: #d0d0d0;
+}
+
+.lang-btn.active {
+    background: #4a90d9;
+    color: white;
+    border-color: #2a5080;
+}
+
+.face-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    cursor: pointer;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    transition: all 0.1s;
+}
+
+.face-btn:active {
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+.big-face {
+    width: 50px;
+    height: 40px;
+    font-size: 28px;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #000;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 2px solid #808080;
+    border-bottom-color: #dfdfdf;
+    border-right-color: #dfdfdf;
+}
+
+.counter {
+    font-family: 'Courier New', monospace;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff0000;
+    background: #000;
+    padding: 2px 8px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.game-board {
+    display: grid;
+    background-image: url('./hormuz_mine_map.jpg');
+    background-size: cover;
+    background-position: center;
+    border: 4px solid rgba(128, 128, 128, 0.8);
+    border-radius: 4px;
+    position: relative;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    position: relative;
+    background: rgba(100, 100, 100, 0.85);
+    border: 2px solid;
+    border-color: #dfdfdf #606060 #606060 #dfdfdf;
+    transition: all 0.05s;
+}
+
+.cell:hover {
+    background: rgba(120, 120, 120, 0.9);
+}
+
+.cell:active:not(.revealed):not(.flagged) {
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+.cell.revealed {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    cursor: default;
+}
+
+.cell.revealed.mine {
+    background: rgba(255, 0, 0, 0.8) !important;
+}
+
+.cell.revealed.mine::after {
+    content: '💣';
+    font-size: 18px;
+}
+
+.cell.revealed.number {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    margin: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.cell.flagged::after {
+    content: '🚩';
+    font-size: 16px;
+}
+
+.cell[data-num="1"] { color: #0000ff; }
+.cell[data-num="2"] { color: #008000; }
+.cell[data-num="3"] { color: #ff0000; }
+.cell[data-num="4"] { color: #000080; }
+.cell[data-num="5"] { color: #8b4513; }
+.cell[data-num="6"] { color: #008080; }
+.cell[data-num="7"] { color: #000000; }
+.cell[data-num="8"] { color: #808080; }
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: linear-gradient(145deg, #c0c0c0, #a0a0a0);
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.animation-container {
+    width: 400px;
+    height: 300px;
+    margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #000;
+}
+
+.close-btn {
+    padding: 12px 40px;
+    font-size: 18px;
+    background: #c0c0c0;
+    border: 3px solid;
+    border-color: #dfdfdf #808080 #808080 #dfdfdf;
+    cursor: pointer;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.close-btn:hover {
+    background: #d0d0d0;
+}
+
+.close-btn:active {
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+}
+
+.fail-animation {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+.fail-animation .explosion {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, #ff6600 0%, #ff0000 30%, #000 70%);
+    border-radius: 50%;
+    animation: explode 0.5s ease-out forwards;
+}
+
+.fail-animation .trump {
+    position: absolute;
+    width: 80px;
+    height: 100px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffb6c1;
+    border-radius: 10px;
+    animation: shake 0.5s ease-in-out forwards;
+}
+
+.fail-animation .trump::before {
+    content: '👨';
+    font-size: 60px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.fail-animation .trump::after {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    top: -10px;
+    left: -20px;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.8) 0%, transparent 70%);
+    animation: flash 0.3s ease-out forwards;
+}
+
+.fail-animation .fail-text {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff0000;
+    text-shadow: 2px 2px 4px #000;
+    animation: textPulse 1s ease-in-out infinite;
+}
+
+@keyframes explode {
+    0% { transform: scale(0); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translate(-50%, -50%) rotate(0); }
+    25% { transform: translate(-50%, -50%) rotate(-10deg); }
+    75% { transform: translate(-50%, -50%) rotate(10deg); }
+}
+
+@keyframes flash {
+    0% { opacity: 1; transform: scale(0.5); }
+    100% { opacity: 0; transform: scale(2); }
+}
+
+.success-animation {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #87CEEB 0%, #1E90FF 100%);
+    overflow: hidden;
+}
+
+.success-animation .ship {
+    position: absolute;
+    width: 60px;
+    height: 40px;
+    bottom: 50px;
+    left: -60px;
+    animation: shipMove 4s linear forwards;
+}
+
+.success-animation .ship::before {
+    content: '🚢';
+    font-size: 40px;
+}
+
+.success-animation .waves {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 60px;
+    background: repeating-linear-gradient(
+        90deg,
+        #1E90FF 0px,
+        #1E90FF 20px,
+        #4169E1 20px,
+        #4169E1 40px
+    );
+    animation: waveMove 2s linear infinite;
+}
+
+.success-animation .text {
+    position: absolute;
+    top: 30%;
+    width: 100%;
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 2px 2px 4px #000;
+    animation: textPulse 1s ease-in-out infinite;
+}
+
+@keyframes shipMove {
+    0% { left: -60px; }
+    100% { left: 100%; }
+}
+
+@keyframes waveMove {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+@keyframes textPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+    </style>
 </head>
 <body>
     <div class="game-wrapper">
         <div class="game-container">
-            <h1 class="game-title">霍尔木兹扫雷</h1>
+            <h1 class="game-title" data-i18="title">霍尔木兹扫雷</h1>
             <header class="game-header">
-            <div class="header-panel">
-                <div class="difficulty-selector">
-                    <button class="diff-btn active" data-level="beginner">初级</button>
-                    <button class="diff-btn" data-level="intermediate">中级</button>
-                    <button class="diff-btn" data-level="expert">高级</button>
+                <div class="header-panel">
+                    <div class="top-row">
+                        <div class="difficulty-selector">
+                            <button class="diff-btn active" data-level="beginner" data-i18="beginner">初级</button>
+                            <button class="diff-btn" data-level="intermediate" data-i18="intermediate">中级</button>
+                            <button class="diff-btn" data-level="expert" data-i18="expert">高级</button>
+                        </div>
+                        <div class="face-btn" id="faceBtn">😊</div>
+                    </div>
+                    <div class="lang-selector">
+                        <button class="lang-btn" data-lang="zh">中文</button>
+                        <button class="lang-btn" data-lang="en">EN</button>
+                        <button class="lang-btn" data-lang="ja">日</button>
+                        <button class="lang-btn" data-lang="ko">한</button>
+                        <button class="lang-btn" data-lang="fr">FR</button>
+                        <button class="lang-btn" data-lang="es">ES</button>
+                        <button class="lang-btn" data-lang="ar">ع</button>
+                        <button class="lang-btn" data-lang="fa">ف</button>
+                    </div>
                 </div>
-                <div class="face-btn" id="faceBtn">😊</div>
+                <div class="game-info">
+                    <div class="counter" id="mineCounter">010</div>
+                    <div class="face-btn big-face" id="faceBtnTop">😊</div>
+                    <div class="counter" id="timer">000</div>
+                </div>
+            </header>
+            
+            <div class="game-board" id="gameBoard">
             </div>
-            <div class="game-info">
-                <div class="counter" id="mineCounter">010</div>
-                <div class="face-btn big-face" id="faceBtnTop">😊</div>
-                <div class="counter" id="timer">000</div>
-            </div>
-        </header>
-        
-        <div class="game-board" id="gameBoard">
         </div>
     </div>
 
@@ -34,10 +487,494 @@
         <div class="modal-content">
             <div class="animation-container" id="animationContainer">
             </div>
-            <button class="close-btn" id="closeModal">关闭</button>
+            <button class="close-btn" id="closeModal" data-i18="close">关闭</button>
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script>
+const translations = {
+    zh: {
+        title: '霍尔木兹扫雷',
+        beginner: '初级',
+        intermediate: '中级',
+        expert: '高级',
+        minesLeft: '剩余雷数',
+        time: '时间',
+        close: '关闭',
+        failTitle: '💥 川普被炸',
+        successTitle: '🚢 油轮通过海峡',
+        gameOver: '游戏结束',
+        gameWin: '胜利！',
+        language: '语言'
+    },
+    en: {
+        title: 'Hormuz Minesweeper',
+        beginner: 'Beginner',
+        intermediate: 'Intermediate',
+        expert: 'Expert',
+        minesLeft: 'Mines',
+        time: 'Time',
+        close: 'Close',
+        failTitle: '💥 Trump Bombed',
+        successTitle: '🚢 Tanker Crossed',
+        gameOver: 'Game Over',
+        gameWin: 'You Win!',
+        language: 'Language'
+    },
+    ja: {
+        title: 'ホルムズマインスイーパー',
+        beginner: '初級',
+        intermediate: '中級',
+        expert: '上級',
+        minesLeft: '地雷',
+        time: '時間',
+        close: '閉じる',
+        failTitle: '💥 トループ炸死',
+        successTitle: '🚢 タンカー海峡通過',
+        gameOver: 'ゲームオーバー',
+        gameWin: '勝利！',
+        language: '言語'
+    },
+    ko: {
+        title: '호르무즈 지뢰 찾기',
+        beginner: '초급',
+        intermediate: '중급',
+        expert: '고급',
+        minesLeft: '지뢰',
+        time: '시간',
+        close: '닫기',
+        failTitle: '💥 트럼프 폭격',
+        successTitle: '🚢 유조선 해협 통과',
+        gameOver: '게임 오버',
+        gameWin: '승리!',
+        language: '언어'
+    },
+    fr: {
+        title: 'Démineur de Hormuz',
+        beginner: 'Débutant',
+        intermediate: 'Intermédiaire',
+        expert: 'Expert',
+        minesLeft: 'Mines',
+        time: 'Temps',
+        close: 'Fermer',
+        failTitle: '💥 Trump Bombardé',
+        successTitle: '🚢 Pétrolier Traversé',
+        gameOver: 'Perdu',
+        gameWin: 'Gagné!',
+        language: 'Langue'
+    },
+    es: {
+        title: 'Buscaminas de Hormuz',
+        beginner: 'Principiante',
+        intermediate: 'Intermedio',
+        expert: 'Experto',
+        minesLeft: 'Minas',
+        time: 'Tiempo',
+        close: 'Cerrar',
+        failTitle: '💥 Trump Bombardead',
+        successTitle: '🚢 Petrolero Cruzado',
+        gameOver: 'Fin del Juego',
+        gameWin: '¡Ganaste!',
+        language: 'Idioma'
+    },
+    ar: {
+        title: 'لعبة الغوم في هرمز',
+        beginner: 'مبتدئ',
+        intermediate: 'متوسط',
+        expert: 'خبير',
+        minesLeft: 'الألغام',
+        time: 'الوقت',
+        close: 'إغلاق',
+        failTitle: '💥 ترمب ينفجر',
+        successTitle: '🚢 ناقلة تعبر المضيق',
+        gameOver: 'انتهت اللعبة',
+        gameWin: 'فزت!',
+        language: 'اللغة'
+    },
+    fa: {
+        title: 'مین‌گذاری هرمز',
+        beginner: 'مبتدی',
+        intermediate: 'متوسط',
+        expert: 'حرفه‌ای',
+        minesLeft: 'مین‌ها',
+        time: 'زمان',
+        close: 'بستن',
+        failTitle: '💥 ترامپ بمب‌گذاری شد',
+        successTitle: '🚢 نفتکش از تنگه عبور کرد',
+        gameOver: 'بازی تمام شد',
+        gameWin: 'برنده شدید!',
+        language: 'زبان'
+    }
+};
+
+let currentLang = localStorage.getItem('lang') || 'zh';
+
+function t(key) {
+    return translations[currentLang]?.[key] || translations.zh[key] || key;
+}
+
+function setLanguage(lang) {
+    if (translations[lang]) {
+        currentLang = lang;
+        localStorage.setItem('lang', lang);
+        updateLanguageDisplay();
+        updateUIText();
+    }
+}
+
+function updateLanguageDisplay() {
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === currentLang);
+    });
+}
+
+function updateUIText() {
+    document.querySelectorAll('[data-i18]').forEach(el => {
+        const key = el.dataset.i18;
+        el.textContent = t(key);
+    });
+}
+
+function initI18n() {
+    updateUIText();
+}
+
+(function() {
+    'use strict';
+
+    const DIFFICULTIES = {
+        beginner: { rows: 8, cols: 8, mines: 10 },
+        intermediate: { rows: 16, cols: 16, mines: 40 },
+        expert: { rows: 16, cols: 30, mines: 99 }
+    };
+
+    const game = {
+        board: [],
+        revealed: [],
+        flagged: [],
+        mines: [],
+        rows: 8,
+        cols: 8,
+        minesCount: 10,
+        flagsUsed: 0,
+        gameOver: false,
+        gameWon: false,
+        timer: 0,
+        timerInterval: null,
+        firstClick: true,
+        difficulty: 'beginner'
+    };
+
+    const elements = {
+        board: document.getElementById('gameBoard'),
+        mineCounter: document.getElementById('mineCounter'),
+        timer: document.getElementById('timer'),
+        faceBtn: document.getElementById('faceBtn'),
+        faceBtnTop: document.getElementById('faceBtnTop'),
+        modal: document.getElementById('gameModal'),
+        animationContainer: document.getElementById('animationContainer'),
+        closeModal: document.getElementById('closeModal'),
+        gameHeader: document.querySelector('.game-header')
+    };
+
+    function init() {
+        initI18n();
+        updateLanguageDisplay();
+        setupEventListeners();
+        startGame('beginner');
+    }
+
+    function setupEventListeners() {
+        elements.faceBtn.addEventListener('click', resetGame);
+        elements.faceBtnTop.addEventListener('click', resetGame);
+        elements.closeModal.addEventListener('click', closeModal);
+
+        elements.gameHeader.addEventListener('click', (e) => {
+            if (e.target.classList.contains('diff-btn')) {
+                const level = e.target.dataset.level;
+                document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                startGame(level);
+            }
+            if (e.target.classList.contains('lang-btn')) {
+                setLanguage(e.target.dataset.lang);
+            }
+        });
+
+        elements.board.addEventListener('mousedown', handleMouseDown);
+        elements.board.addEventListener('mouseup', handleMouseUp);
+        elements.board.addEventListener('contextmenu', e => e.preventDefault());
+    }
+
+    function handleMouseDown(e) {
+        if (game.gameOver || !e.target.classList.contains('cell')) return;
+        setFace('😮');
+    }
+
+    function handleMouseUp(e) {
+        if (game.gameOver) return;
+        setFace('😊');
+
+        if (e.button === 0 && e.target.classList.contains('cell')) {
+            const row = parseInt(e.target.dataset.row);
+            const col = parseInt(e.target.dataset.col);
+            handleClick(row, col);
+        } else if (e.button === 2 && e.target.classList.contains('cell')) {
+            const row = parseInt(e.target.dataset.row);
+            const col = parseInt(e.target.dataset.col);
+            handleRightClick(row, col);
+        }
+    }
+
+    function startGame(difficulty) {
+        game.difficulty = difficulty;
+        const config = DIFFICULTIES[difficulty];
+        game.rows = config.rows;
+        game.cols = config.cols;
+        game.minesCount = config.mines;
+
+        game.board = [];
+        game.revealed = [];
+        game.flagged = [];
+        game.mines = [];
+        game.flagsUsed = 0;
+        game.gameOver = false;
+        game.gameWon = false;
+        game.firstClick = true;
+        game.timer = 0;
+
+        stopTimer();
+        updateMineCounter();
+        updateTimer();
+        setFace('😊');
+
+        for (let r = 0; r < game.rows; r++) {
+            game.board[r] = [];
+            game.revealed[r] = [];
+            game.flagged[r] = [];
+            for (let c = 0; c < game.cols; c++) {
+                game.board[r][c] = 0;
+                game.revealed[r][c] = false;
+                game.flagged[r][c] = false;
+            }
+        }
+
+        renderBoard();
+    }
+
+    function resetGame() {
+        startGame(game.difficulty);
+    }
+
+    function placeMines(excludeRow, excludeCol) {
+        let placed = 0;
+        while (placed < game.minesCount) {
+            const r = Math.floor(Math.random() * game.rows);
+            const c = Math.floor(Math.random() * game.cols);
+
+            const isExcluded = Math.abs(r - excludeRow) <= 1 && Math.abs(c - excludeCol) <= 1;
+
+            if (!game.mines.includes(`${r},${c}`) && !isExcluded) {
+                game.mines.push(`${r},${c}`);
+                game.board[r][c] = -1;
+                placed++;
+            }
+        }
+
+        for (let r = 0; r < game.rows; r++) {
+            for (let c = 0; c < game.cols; c++) {
+                if (game.board[r][c] !== -1) {
+                    game.board[r][c] = countAdjacentMines(r, c);
+                }
+            }
+        }
+    }
+
+    function countAdjacentMines(row, col) {
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = row + dr;
+                const nc = col + dc;
+                if (nr >= 0 && nr < game.rows && nc >= 0 && nc < game.cols) {
+                    if (game.board[nr][nc] === -1) count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    function renderBoard() {
+        elements.board.innerHTML = '';
+        elements.board.style.gridTemplateColumns = `repeat(${game.cols}, 30px)`;
+        elements.board.style.gridTemplateRows = `repeat(${game.rows}, 30px)`;
+
+        for (let r = 0; r < game.rows; r++) {
+            for (let c = 0; c < game.cols; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.row = r;
+                cell.dataset.col = c;
+                elements.board.appendChild(cell);
+            }
+        }
+    }
+
+    function handleClick(row, col) {
+        if (game.flagged[row][col] || game.revealed[row][col] || game.gameOver) return;
+
+        if (game.firstClick) {
+            placeMines(row, col);
+            game.firstClick = false;
+            startTimer();
+        }
+
+        if (game.board[row][col] === -1) {
+            revealMine(row, col);
+            gameOver(false);
+        } else {
+            revealCell(row, col);
+            checkWin();
+        }
+    }
+
+    function handleRightClick(row, col) {
+        if (game.revealed[row][col] || game.gameOver) return;
+
+        const cell = getCell(row, col);
+        if (game.flagged[row][col]) {
+            game.flagged[row][col] = false;
+            cell.classList.remove('flagged');
+            game.flagsUsed--;
+        } else {
+            game.flagged[row][col] = true;
+            cell.classList.add('flagged');
+            game.flagsUsed++;
+        }
+        updateMineCounter();
+    }
+
+    function revealCell(row, col) {
+        if (row < 0 || row >= game.rows || col < 0 || col >= game.cols) return;
+        if (game.revealed[row][col] || game.flagged[row][col]) return;
+
+        game.revealed[row][col] = true;
+        const cell = getCell(row, col);
+        cell.classList.add('revealed');
+
+        const value = game.board[row][col];
+        if (value > 0) {
+            cell.textContent = value;
+            cell.dataset.num = value;
+            cell.classList.add('number');
+        } else if (value === 0) {
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    revealCell(row + dr, col + dc);
+                }
+            }
+        }
+    }
+
+    function revealMine(row, col) {
+        for (const pos of game.mines) {
+            const [r, c] = pos.split(',').map(Number);
+            const cell = getCell(r, c);
+            cell.classList.add('revealed', 'mine');
+            if (r === row && c === col) {
+                cell.style.background = 'radial-gradient(circle, red, darkred)';
+            }
+        }
+    }
+
+    function getCell(row, col) {
+        return elements.board.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    }
+
+    function checkWin() {
+        let revealedCount = 0;
+        for (let r = 0; r < game.rows; r++) {
+            for (let c = 0; c < game.cols; c++) {
+                if (game.revealed[r][c]) revealedCount++;
+            }
+        }
+
+        if (revealedCount === game.rows * game.cols - game.minesCount) {
+            gameOver(true);
+        }
+    }
+
+    function gameOver(won) {
+        game.gameOver = true;
+        game.gameWon = won;
+        stopTimer();
+
+        if (won) {
+            setFace('😎');
+            showModal('success');
+        } else {
+            setFace('😵');
+            showModal('fail');
+        }
+    }
+
+    function setFace(face) {
+        elements.faceBtn.textContent = face;
+        elements.faceBtnTop.textContent = face;
+    }
+
+    function startTimer() {
+        stopTimer();
+        game.timerInterval = setInterval(() => {
+            game.timer++;
+            if (game.timer > 999) game.timer = 999;
+            updateTimer();
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (game.timerInterval) {
+            clearInterval(game.timerInterval);
+            game.timerInterval = null;
+        }
+    }
+
+    function updateTimer() {
+        elements.timer.textContent = String(game.timer).padStart(3, '0');
+    }
+
+    function updateMineCounter() {
+        const remaining = game.minesCount - game.flagsUsed;
+        elements.mineCounter.textContent = String(remaining).padStart(3, '0');
+    }
+
+    function showModal(type) {
+        elements.animationContainer.innerHTML = '';
+
+        if (type === 'fail') {
+            const failDiv = document.createElement('div');
+            failDiv.className = 'fail-animation';
+            failDiv.innerHTML = '<div class="explosion"></div><div class="trump"></div><div class="fail-text">' + t('failTitle') + '</div>';
+            elements.animationContainer.appendChild(failDiv);
+        } else {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-animation';
+            successDiv.innerHTML = '<div class="text">🎉 ' + t('successTitle') + ' 🎉</div><div class="ship"></div><div class="waves"></div>';
+            elements.animationContainer.appendChild(successDiv);
+        }
+
+        elements.modal.classList.add('show');
+    }
+
+    function closeModal() {
+        elements.modal.classList.remove('show');
+        resetGame();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+})();
+    </script>
 </body>
 </html>
