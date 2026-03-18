@@ -359,8 +359,10 @@ body {
 }
 
 .animation-container {
-    width: 400px;
-    height: 300px;
+    width: 90vw;
+    max-width: 600px;
+    height: auto;
+    aspect-ratio: 16 / 9;
     margin: 20px auto;
     display: flex;
     justify-content: center;
@@ -368,6 +370,34 @@ body {
     overflow: hidden;
     border-radius: 10px;
     background: #000;
+}
+
+.fail-video {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+}
+
+.fail-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.fail-video .subtitle {
+    position: absolute;
+    bottom: 10%;
+    width: 100%;
+    text-align: center;
+    font-size: clamp(18px, 4vw, 32px);
+    font-weight: bold;
+    color: #ffff00;
+    text-shadow: 3px 3px 6px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    animation: subtitleAppear 0.5s ease-out;
 }
 
 .close-btn {
@@ -448,32 +478,11 @@ body {
     animation: textPulse 1s ease-in-out infinite;
 }
 
-.fail-video {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #000;
-}
-
-.fail-video video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.fail-video .subtitle {
-    position: absolute;
-    bottom: 40px;
-    width: 100%;
-    text-align: center;
-    font-size: 28px;
-    font-weight: bold;
-    color: #ffff00;
-    text-shadow: 3px 3px 6px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-    animation: subtitleAppear 0.5s ease-out;
+@media (max-width: 600px) {
+    .animation-container {
+        width: 95vw;
+        aspect-ratio: 16 / 9;
+    }
 }
 
 @keyframes explode {
@@ -615,6 +624,7 @@ const translations = {
         time: '时间',
         close: '关闭',
         failTitle: '💥 川普被炸',
+        failSubtitle: '任务失败，川普被炸',
         successTitle: '🚢 油轮通过海峡',
         gameOver: '游戏结束',
         gameWin: '胜利！',
@@ -629,6 +639,7 @@ const translations = {
         time: 'Time',
         close: 'Close',
         failTitle: '💥 Trump Bombed',
+        failSubtitle: 'Mission Failed, Trump Bombed',
         successTitle: '🚢 Tanker Crossed',
         gameOver: 'Game Over',
         gameWin: 'You Win!',
@@ -643,6 +654,7 @@ const translations = {
         time: '時間',
         close: '閉じる',
         failTitle: '💥 トループ炸死',
+        failSubtitle: '任務失敗、トループ炸死',
         successTitle: '🚢 タンカー海峡通過',
         gameOver: 'ゲームオーバー',
         gameWin: '勝利！',
@@ -657,6 +669,7 @@ const translations = {
         time: '시간',
         close: '닫기',
         failTitle: '💥 트럼프 폭격',
+        failSubtitle: '임무 실패, 트럼프 폭격',
         successTitle: '🚢 유조선 해협 통과',
         gameOver: '게임 오버',
         gameWin: '승리!',
@@ -671,6 +684,7 @@ const translations = {
         time: 'Temps',
         close: 'Fermer',
         failTitle: '💥 Trump Bombardé',
+        failSubtitle: 'Mission Ratée, Trump Bombardé',
         successTitle: '🚢 Pétrolier Traversé',
         gameOver: 'Perdu',
         gameWin: 'Gagné!',
@@ -685,6 +699,7 @@ const translations = {
         time: 'Tiempo',
         close: 'Cerrar',
         failTitle: '💥 Trump Bombardead',
+        failSubtitle: 'Misión Fallida, Trump Bombardead',
         successTitle: '🚢 Petrolero Cruzado',
         gameOver: 'Fin del Juego',
         gameWin: '¡Ganaste!',
@@ -699,6 +714,7 @@ const translations = {
         time: 'الوقت',
         close: 'إغلاق',
         failTitle: '💥 ترمب ينفجر',
+        failSubtitle: 'فشلت المهمة، ترمب ينفجر',
         successTitle: '🚢 ناقلة تعبر المضيق',
         gameOver: 'انتهت اللعبة',
         gameWin: 'فزت!',
@@ -713,6 +729,7 @@ const translations = {
         time: 'زمان',
         close: 'بستن',
         failTitle: '💥 ترامپ بمب‌گذاری شد',
+        failSubtitle: 'ماموریت شکست خورد، ترامپ بمب‌گذاری شد',
         successTitle: '🚢 نفتکش از تنگه عبور کرد',
         gameOver: 'بازی تمام شد',
         gameWin: 'برنده شدید!',
@@ -1185,7 +1202,7 @@ function initI18n() {
             failVideoDiv.className = 'fail-video';
             failVideoDiv.innerHTML = `
                 <video id="failVideo" src="./fail.mp4" autoplay loop></video>
-                <div class="subtitle">任务失败，川普被炸</div>
+                <div class="subtitle">${t('failSubtitle')}</div>
             `;
             elements.animationContainer.appendChild(failVideoDiv);
         } else {
